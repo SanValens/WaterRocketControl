@@ -69,7 +69,7 @@ void MPUController::calibrate_accel() {
 }
 
 void MPUController::calibrate_gyro() {
-  Serial.println("Gyros3cope calibration initialized, hold still");
+  Serial.println("Gyroscope calibration initialized, hold still");
   float sum[] = { 0, 0, 0 };
   float counter = 0;
   for (int i = 0; i < 500; i++) {

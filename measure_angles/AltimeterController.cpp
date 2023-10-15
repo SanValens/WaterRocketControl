@@ -38,7 +38,7 @@ void AltimeterController::getReferencePressure() {
   float pressures = 0;
   int counter = 0;
   for(int i = 0; i < 250; i++) {
-    pressures += readPressure(0);
+    pressures += readPressure();
     counter++;
     delay(50);
   }
@@ -101,7 +101,7 @@ float AltimeterController::readTemperature(bool for_pressure) {
   }
 }
 
-float AltimeterController::readPressure(bool for_altitude) {
+float AltimeterController::readPressure() {
   //If for_altitude = 1 returns altitude in meters
   //Othewise it returns the pressure in Pa
   readTemperature(1);
@@ -125,13 +125,15 @@ float AltimeterController::readPressure(bool for_altitude) {
   var2 = (((int64_t)signed_digP[8]) * p) >> 19;
 
   p = ((p + var1 + var2) >> 8) + (((int64_t)signed_digP[7]) << 4);
-  if(for_altitude) {
-    return readAbsAltitude((float)p / 256);
-  } else {
-    return (float)p / 256; //Returns altitude in pascals
-  }
+  return (float)p / 256; //Returns altitude in pascals
 }
 
-double AltimeterController::readAbsAltitude(double p) {
-  return (log((p/101325.0))/log(2.718281828)) * ((referenceTemperature + 273.15))/(-3.416 / 100);
+float AltimeterController::readAbsAltitude() {
+  return (log((readPressure()/101325.0))/log(2.718281828)) * ((readTemperature(0) + 273.15))/(-3.416 / 100);
+  //return 44330.0*(1-pow((readPressure()/101325.0), 0.19029));
+}
+
+float AltimeterController::readRelAltitude() {
+  //return (log((readPressure()/))/log(2.718281828)) * ((readTemperature(0) + 273.15))/(-3.416 / 100);
+  //return 44330*(1-pow((readPressure()/), 0.19029));
 }

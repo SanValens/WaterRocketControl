@@ -5,13 +5,13 @@ A little personal project to practice Wire library, I2C interface, serial commun
 
 # Requirements
 
-MPU6050 gyroscope and accelerometer (soon upgrated to BMI160)
+MPU6050 gyroscope and accelerometer (soon upgraded to BMI160)
 
 BMP280 barometer and thermometer 
 
 SG90 Servomotor 
 
-RGB Led (soon upgrated to OLED Screen 128 x 64px)
+RGB Led (soon upgraded to OLED Screen 128 x 64px)
 
 
 # License

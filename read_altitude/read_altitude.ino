@@ -54,13 +54,11 @@ void getReferencePressure() {
   float pressures = 0;
   int counter = 0;
   for(int i = 0; i < 100; i++) {
-    pressures += readPressure(0);
+    pressures += readPressure();
     counter++;
     delay(50);
   }
   referencePressure = pressures/counter;
-  Serial.print("Reference pressure: ");
-  Serial.println(referencePressure);
   delay(3000);
 }
 
@@ -112,12 +110,11 @@ float readTemperature(bool for_pressure) {
 
     T = (t_fine * 5 + 128) >> 8;
 
-    float referenceTemperature = float(T) / 100;
-    return referenceTemperature;
+    return float(T) / 100;
   }
 }
 
-float readPressure(bool for_altitude) {
+float readPressure() {
   //If for_altitude = 1 returns altitude in meters
   //Othewise it returns the pressure in Pa
   readTemperature(1);
@@ -141,19 +138,17 @@ float readPressure(bool for_altitude) {
   var2 = (((int64_t)signed_digP[8]) * p) >> 19;
 
   p = ((p + var1 + var2) >> 8) + (((int64_t)signed_digP[7]) << 4);
-  if(for_altitude) {
-    return readAbsAltitude((float)p / 256);
-  } else {
-    return (float)p / 256; //Returns altitude in pascals
-  }
+
+  return (float)p / 256; //Returns altitude in pascals
 }
 
-double readAbsAltitude(double p) {
-  return (log((p/101325.0))/log(2.718281828)) * ((referenceTemperature + 273.15))/(-3.416 / 100);
+double readAbsAltitude() {
+  return (log((readPressure()/101325.0))/log(2.718281828)) * ((readTemperature(0) + 273.15))/(-3.416 / 100);
+  //return 44330*(1-pow((readPressure()/101325), 0.19029));
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.println(readTemperature(0));
+  Serial.println(readAbsAltitude());
   delay(2000);
 }

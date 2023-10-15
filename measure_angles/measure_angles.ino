@@ -24,11 +24,13 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  mpu6050.accel_update();
+/*   mpu6050.accel_update();
   for(int i = 0; i < 3; i++) {
     Serial.print(mpu6050.accel_data[i]);
     Serial.print("\t");
   }
   Serial.println();
-  delay(100);
+  delay(100); */
+  Serial.print("Altura respecto al nivel de mar: ");
+  Serial.println(bmp280.readAbsAltitude());
 }
