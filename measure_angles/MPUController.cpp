@@ -6,7 +6,13 @@ MPUController::MPUController() {
 
 }
 
-void begin(int addrs) {
+
+
+void MPUController::begin(int addrs) {
+  for(int i = 0; i < 3; i++) {
+    offset_raw_a[i] = 0.0;
+    offset_raw_g[i] = 0.0;
+  }
   mpuAdd = addrs;
   Wire.begin();
   delay(250);
@@ -45,9 +51,9 @@ void begin(int addrs) {
 void MPUController::calibrate_accel() {
   float sum[] = {0.0,0.0,0.0};
   float counter = 0.0;
-  Serial.println("Calibration started, leave the device on a flat surface");
+  Serial.println("Acceleration calibration started, leave the device on a flat surface");
   delay(100);
-  for(int i = 0; i < 100; i++) {
+  for(int i = 0; i < 300; i++) {
     accel_update();
     counter += 1.0;
     for(int j = 0; j < 3; j++) {
@@ -59,11 +65,11 @@ void MPUController::calibrate_accel() {
     offset_raw_a[j] = sum[j] / counter;
   }
   offset_raw_a[2] = -2048.0 + offset_raw_a[2];
-  Serial.println("Calibration finished");
+  Serial.println("Acceleration calibration finished");
 }
 
 void MPUController::calibrate_gyro() {
-  Serial.println("Calibration initialized, hold still");
+  Serial.println("Gyros3cope calibration initialized, hold still");
   float sum[] = { 0, 0, 0 };
   float counter = 0;
   for (int i = 0; i < 500; i++) {

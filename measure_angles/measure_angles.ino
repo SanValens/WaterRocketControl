@@ -24,6 +24,11 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.println(bmp280.readTemperature(0));
-  delay(50);
+  mpu6050.accel_update();
+  for(int i = 0; i < 3; i++) {
+    Serial.print(mpu6050.accel_data[i]);
+    Serial.print("\t");
+  }
+  Serial.println();
+  delay(100);
 }
