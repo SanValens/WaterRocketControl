@@ -1,25 +1,15 @@
+#include <Arduino.h>
+#include "MPUController.h"
 #include <Wire.h>
 
-#define mpuAdd 0x68
+MPUController::MPUController() {
 
-float accel_raw[3], accel_data[3];
-float offset_raw_a[] = {0.0,0.0,0.0};
+}
 
-
-float gyro_data[3], gyro_raw[3];
-float offset_raw_g[] = {0.0, 0.0, 0.0};
-
-long timer;
-
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  while(!Serial) {}
-
-
+void begin(int addrs) {
+  mpuAdd = addrs;
   Wire.begin();
   delay(250);
-  Wire.setClock(400000);
 
   //Select powermode
   Wire.beginTransmission(mpuAdd);
@@ -51,7 +41,8 @@ void setup() {
   calibrate_gyro();
 }
 
-void calibrate_accel() {
+
+void MPUController::calibrate_accel() {
   float sum[] = {0.0,0.0,0.0};
   float counter = 0.0;
   Serial.println("Calibration started, leave the device on a flat surface");
@@ -71,7 +62,7 @@ void calibrate_accel() {
   Serial.println("Calibration finished");
 }
 
-void calibrate_gyro() {
+void MPUController::calibrate_gyro() {
   Serial.println("Calibration initialized, hold still");
   float sum[] = { 0, 0, 0 };
   float counter = 0;
@@ -89,7 +80,7 @@ void calibrate_gyro() {
   Serial.println("Calibration finished");
 }
 
-void accel_update() {
+void MPUController::accel_update() {
   Wire.beginTransmission(mpuAdd);
   Wire.write(0x3B);
   Wire.endTransmission();
@@ -102,7 +93,7 @@ void accel_update() {
   }
 }
 
-void gyro_update(void) {
+void MPUController::gyro_update(void) {
   Wire.beginTransmission(0x68);
   Wire.write(0x43);  //Register holding gyroscope, we indicate we are going to use this one
   Wire.endTransmission();
@@ -115,15 +106,4 @@ void gyro_update(void) {
     }
     //Ergo when i call .read() 6 times, i finish with no bytes in the buffer
   }
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-  accel_update();
-  for(int i = 0; i < 3; i++) {
-    Serial.print(accel_data[i]);
-    Serial.print("\t");
-  }
-  Serial.println();
-  delay(100);
 }

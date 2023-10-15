@@ -1,59 +1,43 @@
-/*
-
-  For more info about this code consult my OneNote Project Structure in the PERSONAL - WATER ROCKET file
-
-*/
-
+#include <Arduino.h>
+#include "AltimeterController.h"
 #include <Wire.h>
-#include <math.h>
 
+AltimeterController::AltimeterController() {
 
-int32_t t_fine;
-uint16_t dig_T1, dig_P1; //unsigned
-int16_t signed_digT[4]; //dig_T2 to T3, and dig_P2 to P9; Array[0] and array[1] = 0 for simplicity
-int16_t signed_digP[10]; //dig_P2 to P9; Array[0] and array[1] = 0 for simplicity
-//VALUES IN THE ARRAY ARE NORMALY NUMERATED WITH THE DATASHEET NUMBER OF COEFFICIENT e.g digP4 = signed_digP[4]
+}
 
-
-#define bmp280add 0x76
-
-int32_t rawTemp, rawPressure;
-
-float referenceTemperature = 27.1;
-float referencePressure;
-
-void setup() {
+void AltimeterController::begin(int addrs)
+{ 
+  _bmp280add = addrs;
   // put your setup code here, to run once:
-  Serial.begin(9600);
-  while(!Serial) {
-  }
-  Serial.println("Cheap bmp280");
+  Serial.println("Initializing BMP280 altimeter...");
+
 
   Wire.begin();
   delay(250);
   readCoefficients();
 
   //Initializes configuration of oversamplings and power
-  Wire.beginTransmission(bmp280add);
+  Wire.beginTransmission(_bmp280add);
   Wire.write(0xF4);
   Wire.write(0x57); //0x53 to set x2 Temp-oversampling; x16 pressure-oversampling and normal power-mode 
   Wire.endTransmission();
 
-  Wire.beginTransmission(bmp280add);
+  Wire.beginTransmission(_bmp280add);
   Wire.write(0xF5);
   Wire.write(0x14); //Set standby to sandard and filter to 16w. Finally to 00 bits we ignore cause they are for serial communication
   Wire.endTransmission();
 
+
   delay(100);
 
-
-  getReferencePressure();
+  //getReferencePressure();
 }
 
-void getReferencePressure() {
+void AltimeterController::getReferencePressure() {
   float pressures = 0;
   int counter = 0;
-  for(int i = 0; i < 100; i++) {
+  for(int i = 0; i < 250; i++) {
     pressures += readPressure(0);
     counter++;
     delay(50);
@@ -61,14 +45,13 @@ void getReferencePressure() {
   referencePressure = pressures/counter;
   Serial.print("Reference pressure: ");
   Serial.println(referencePressure);
-  delay(3000);
 }
 
-void readCoefficients() {
-  Wire.beginTransmission(bmp280add);
+void AltimeterController::readCoefficients() {
+  Wire.beginTransmission(_bmp280add);
   Wire.write(0x88);
   Wire.endTransmission();
-  Wire.requestFrom(bmp280add, 24);
+  Wire.requestFrom(_bmp280add, 24);
   if(Wire.available() == 24) {
     //Different structure than as usual bc the MSB is the second byte, not the first one:
     dig_T1 = int16_t(Wire.read()) | int16_t(Wire.read()) << 8; 
@@ -82,18 +65,19 @@ void readCoefficients() {
   }
 }
 
-float readTemperature(bool for_pressure) {
+float AltimeterController::readTemperature(bool for_pressure) {
   if(for_pressure) {  
-    Wire.beginTransmission(bmp280add);
+    Wire.beginTransmission(_bmp280add);
     Wire.write(0xF7);
     Wire.endTransmission();
-    Wire.requestFrom(bmp280add, 6);
+    Wire.requestFrom(_bmp280add, 6);
     rawPressure = (uint32_t(Wire.read()) << 16 | uint32_t(Wire.read()) << 8 | uint32_t(Wire.read())) >> 4;
   } else {
-    Wire.beginTransmission(bmp280add);
+    Wire.beginTransmission(_bmp280add);
     Wire.write(0xFA);
     Wire.endTransmission();
-    Wire.requestFrom(bmp280add, 3);
+    Wire.requestFrom(_bmp280add, 3);
+    delay(100);
   }
   if(Wire.available() >= 3) {
     /*  
@@ -117,7 +101,7 @@ float readTemperature(bool for_pressure) {
   }
 }
 
-float readPressure(bool for_altitude) {
+float AltimeterController::readPressure(bool for_altitude) {
   //If for_altitude = 1 returns altitude in meters
   //Othewise it returns the pressure in Pa
   readTemperature(1);
@@ -148,12 +132,6 @@ float readPressure(bool for_altitude) {
   }
 }
 
-double readAbsAltitude(double p) {
+double AltimeterController::readAbsAltitude(double p) {
   return (log((p/101325.0))/log(2.718281828)) * ((referenceTemperature + 273.15))/(-3.416 / 100);
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.println(readTemperature(0));
-  delay(2000);
 }
