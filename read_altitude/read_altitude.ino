@@ -115,8 +115,6 @@ float readTemperature(bool for_pressure) {
 }
 
 float readPressure() {
-  //If for_altitude = 1 returns altitude in meters
-  //Othewise it returns the pressure in Pa
   readTemperature(1);
   int64_t var1, var2, p;
 
@@ -149,6 +147,6 @@ double readAbsAltitude() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.println(readAbsAltitude());
+  Serial.println(readPressure());
   delay(2000);
 }
