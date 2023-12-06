@@ -10,7 +10,7 @@ class SDController {
   SDController();
   void begin();
   void createFile();
-  void data_save(float value);
+  void data_save(char value[60]);
   bool data_check();
   private:
   int sspin = 4;

@@ -37,7 +37,7 @@ void SDController::createFile() {
 }
 
 
-void SDController::data_save(float value) {
+void SDController::data_save(char value[60]) {
   dataFile = SD.open(file_name, FILE_WRITE);
   dataFile.println(value);
   dataFile.close();

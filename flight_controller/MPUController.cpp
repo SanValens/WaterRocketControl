@@ -69,7 +69,7 @@ void MPUController::calibrate_accel() {
 void MPUController::calibrate_gyro() {
   float sum[] = { 0, 0, 0 };
   float counter = 0;
-  for (int i = 0; i < 500; i++) {
+  for (int i = 0; i < 300; i++) {
     counter += 1.0;
     gyro_update();
     for (int j = 0; j < 3; j++) {
