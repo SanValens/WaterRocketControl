@@ -64,7 +64,6 @@ void MPUController::calibrate_accel() {
     offset_raw_a[j] = sum[j] / counter;
   }
   offset_raw_a[2] = -2048.0 + offset_raw_a[2];
-  Serial.println("Acceleration calibration finished");
 }
 
 void MPUController::calibrate_gyro() {
@@ -81,7 +80,6 @@ void MPUController::calibrate_gyro() {
   for (int j = 0; j < 3; j++) {
     offset_raw_g[j] = sum[j] / counter;
   }
-  Serial.println("Gyroscope calibration finished");
 }
 
 void MPUController::accel_update() {

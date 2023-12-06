@@ -13,9 +13,7 @@ SDController::SDController() {
 }
 
 void SDController::begin() {
-  Serial.println("Initializing SD Card...");
   while (!SD.begin(sspin)) {}
-  Serial.println("SD Card initialized");
   delay(1000);
   createFile();
   delay(1000);
@@ -32,8 +30,6 @@ void SDController::createFile() {
       }
       delay(30);
     }
-    Serial.print("I just created a file called: ");
-    Serial.println(file_name);
     dataFile = SD.open(file_name, FILE_WRITE);
     dataFile.close();
     delay(2000);
@@ -41,9 +37,8 @@ void SDController::createFile() {
 }
 
 
-void SDController::data_save(char messg[]) {
+void SDController::data_save(String messg) {
   dataFile = SD.open(file_name, FILE_WRITE);
-  Serial.println(messg);
   dataFile.println(messg);
   dataFile.close();
 }

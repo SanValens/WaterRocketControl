@@ -10,7 +10,7 @@ class SDController {
   SDController();
   void begin();
   void createFile();
-  void data_save(char messg[]);
+  void data_save(String messg);
   private:
   int sspin = 9;
 };

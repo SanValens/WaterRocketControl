@@ -19,23 +19,24 @@ String condensed_data;
 
 void setup() {
   Serial.begin(9600);
+  pinMode(3, OUTPUT);
+  digitalWrite(3, HIGH);
   while (!Serial) {
     Serial.println("Error in serial initializing");
   }
-
   pinMode(9, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
 
-  Serial.println("Initializing SD Card...");
   while (!SD.begin(9)) {}
-  Serial.println("SD Card initialized");
 
   pinMode(tilt_switch_in_pin, INPUT_PULLUP);
-
-  Serial.println("Initializing calibrations...");
   bmp.begin(addrs_bmp);
-  //mpu.begin(addrs_mpu);
-  Serial.println("All calibrations finished...");
+  mpu.begin(addrs_mpu);
   sdm.begin();
+  digitalWrite(3, LOW);
+  digitalWrite(4, HIGH);
   delay(1000);
   sdm.data_save("-------------------");
   sdm.data_save("FLIGHT DATA 11/04/2022");
@@ -43,9 +44,16 @@ void setup() {
 }
 
 void loop() {
-}
-
-void stop() {
+  digitalWrite(4, LOW);
+  digitalWrite(5, HIGH);
+  while(digitalRead(tilt_switch_in_pin)) {
+    mpu.update_angle_by_kalman_filter();
+    Serial.println(mpu.angle_data_by_kalman[0]);
+    delay(10);
+    //sdm.data_save(String(mpu.angle_data_by_kalman[0])); 
+  }
   Serial.println("Code stopped");
-  while(1){}
+  digitalWrite(3, HIGH);
+  digitalWrite(5, HIGH);
+  while(1){};
 }

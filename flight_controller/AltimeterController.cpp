@@ -41,7 +41,6 @@ void AltimeterController::getReferencePressure() {
     delay(50);
   }
   referencePressure = pressures/counter;
-  Serial.println("Reference pressure calculated");
 }
 
 void AltimeterController::readCoefficients() {
