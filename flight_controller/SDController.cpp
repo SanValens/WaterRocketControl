@@ -6,7 +6,7 @@
 const String FILENAMEROOT = "FLGTDT";
 int filecount = 0;
 File dataFile;
-String file_name = "FLGTDT.txt";
+String file_name = "FLGTDT.csv";
 
 SDController::SDController() {
 
@@ -24,9 +24,9 @@ void SDController::createFile() {
   while (SD.exists(file_name)) {
       filecount++;
       if (filecount < 10) {
-        file_name = FILENAMEROOT + "0" + filecount + ".txt";
+        file_name = FILENAMEROOT + "0" + filecount + ".csv";
       } else {
-        file_name = FILENAMEROOT + filecount + ".txt";
+        file_name = FILENAMEROOT + filecount + ".csv";
       }
       delay(30);
     }
@@ -37,8 +37,18 @@ void SDController::createFile() {
 }
 
 
-void SDController::data_save(String messg) {
+void SDController::data_save(float value) {
   dataFile = SD.open(file_name, FILE_WRITE);
-  dataFile.println(messg);
+  dataFile.println(value);
   dataFile.close();
+}
+
+bool SDController::data_check() {
+  dataFile = SD.open(file_name, FILE_WRITE);
+  if(SD.exists(file_name) && dataFile.size() > 0) {
+    dataFile.close();
+    return true;
+  } else {
+    return false;
+  }
 }

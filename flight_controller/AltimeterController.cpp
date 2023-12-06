@@ -29,10 +29,10 @@ void AltimeterController::begin(int addrs)
 
   delay(100);
 
-  getReferencePressure();
+  //getReferencePressure();
 }
 
-void AltimeterController::getReferencePressure() {
+/* void AltimeterController::getReferencePressure() {
   float pressures = 0;
   int counter = 0;
   for(int i = 0; i < 50; i++) {
@@ -41,7 +41,7 @@ void AltimeterController::getReferencePressure() {
     delay(50);
   }
   referencePressure = pressures/counter;
-}
+} */
 
 void AltimeterController::readCoefficients() {
   Wire.beginTransmission(_bmp280add);
@@ -61,6 +61,7 @@ void AltimeterController::readCoefficients() {
   }
 }
 
+/*For pressure it's a mathematical shorcut i should look into chaging it*/
 float AltimeterController::readTemperature(bool for_pressure) {
   if(for_pressure) {  
     Wire.beginTransmission(_bmp280add);
@@ -92,14 +93,11 @@ float AltimeterController::readTemperature(bool for_pressure) {
 
     T = (t_fine * 5 + 128) >> 8;
 
-    float referenceTemperature = float(T) / 100;
-    return referenceTemperature;
+    return float(T) / 100;
   }
 }
 
 float AltimeterController::readPressure() {
-  //If for_altitude = 1 returns altitude in meters
-  //Othewise it returns the pressure in Pa
   readTemperature(1);
   int64_t var1, var2, p;
 
@@ -121,10 +119,10 @@ float AltimeterController::readPressure() {
   var2 = (((int64_t)signed_digP[8]) * p) >> 19;
 
   p = ((p + var1 + var2) >> 8) + (((int64_t)signed_digP[7]) << 4);
-  return (float)p / 256; //Returns altitude in pascals
+  return (float)p / 256; //Returns pressure in pascals
 }
 
-float AltimeterController::readAbsAltitude() {
+/* float AltimeterController::readAbsAltitude() {
   return (log((readPressure()/101000.0))/log(2.718281828)) * ((readTemperature(0) + 273.15))/(-3.416 / 100);
   //return 44330.0*(1-pow((readPressure()/101325.0), 0.19029)); //Another equation i found
 }
@@ -137,4 +135,4 @@ float AltimeterController::readRelAltitude() {
 
 float AltimeterController::readRelAltitudeIndependentTemperature() {
   return 44330*(1-pow((readPressure()/referencePressure), 0.19029)); //Another equation i found
-}
+} */
