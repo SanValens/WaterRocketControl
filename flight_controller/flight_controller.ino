@@ -19,9 +19,9 @@ const int red_rgb = 5;
 const int green_rgb = 6;
 const int blue_rgb = 7;
 const int sspin = 4;
+float max_pressure = 0;
 
-const int info_lenght = 40;
-char info[info_lenght];
+char info_temp_press[90] = "";
 
 void setup() {
   Serial.begin(9600);
@@ -37,9 +37,8 @@ void setup() {
   sdm.begin();
   ledColor(0, 0, 1);  //BLUE
   pinMode(tilt_switch_in_pin, INPUT_PULLUP);
-  sdm.data_save("");
-  sdm.data_save("FLIGHT DATA 11/04/2022");
-  sdm.data_save("Time(ms), Angle X(°)");
+  sdm.data_save("FLIGHT DATA");
+  sdm.data_save("Time(ms), T(degC), P(Pa), a-X(g), a-Y(g), a-Z(g), w-X (deg/s), w-Y (deg/s), w-Z (deg/s), Angle-X (deg), Angle-Y(deg)");
   bmp.begin(addrs_bmp);
   mpu.begin(addrs_mpu);
   delay(1000);
@@ -56,25 +55,45 @@ void flight_mode() {
   ledColor(0, 1, 0);  //GREEN
   while(digitalRead(tilt_switch_in_pin)) {}
   ledColor(1, 0, 1);  //PURBLE
+
+  //A little pre-update to fresh-up initial values
+  mpu.accel_update();
+  mpu.gyro_update();
+  mpu.update_angle_by_kalman_filter();
   delay(1000);
+
   long last_time = millis(), init_time = millis();
-  int interval_length = 60;
+  int interval_length = 45;
   while (digitalRead(tilt_switch_in_pin)) {
     if (millis() - last_time > interval_length) {
       long time = millis();
       mpu.update_angle_by_kalman_filter();
       mpu.accel_update();
       mpu.gyro_update();
+      float temp = bmp.readTemperature(0);
       float pressure = bmp.readPressure();
-      float acc_z = mpu.accel_data[2];
-      float ang_vel_x = mpu.gyro_data[0];
-      float ang_kal_x = mpu.angle_data_by_kalman[0];
-      snprintf(info, info_lenght, "%ld,%d,%ld.%03d,%s%d.%03d,%s%d.%03d,%s%d.%03d", time - init_time, int(time - last_time), long(pressure), (int((pressure - long(pressure)) * 1000)), acc_z < 0 ? "-" : "", abs(int(mpu.accel_data[2])), abs((int)(1000*(acc_z -int(acc_z)))),ang_vel_x < 0 ? "-" : "", abs(int(ang_vel_x)), abs(int(1000*(ang_vel_x - int(ang_vel_x)))),ang_kal_x < 0 ? "-" : "", abs(int(ang_kal_x)), abs(int(1000*(ang_kal_x - int(ang_kal_x)))));
-      sdm.data_save(info);
-      last_time = millis();
+      snprintf(info_temp_press, sizeof(info_temp_press), "%ld,%d,%d.%02d,%ld.%02d", (int(temp)), (int)(100 * (temp - int(temp))), long(pressure), (int)(100 * (pressure - long(pressure))));
+      for (int i = 0; i < 3; i++) {
+        snprintf(info_temp_press, sizeof(info_temp_press), "%s,%s%d.%02d", info_temp_press, mpu.accel_data[i] < 0 ? "-" : "", abs(int(mpu.accel_data[i])), abs((int)(100 * (mpu.accel_data[i] - int(mpu.accel_data[i])))));
+      }
+      for (int i = 0; i < 3; i++) {
+        snprintf(info_temp_press, sizeof(info_temp_press), "%s,%s%d.%02d", info_temp_press, mpu.gyro_data[i] < 0 ? "-" : "", abs(int(mpu.gyro_data[i])), abs((int)(100 * (mpu.gyro_data[i] - int(mpu.gyro_data[i])))));
+      }
+      for (int i = 0; i < 2; i++) {
+        snprintf(info_temp_press, sizeof(info_temp_press), "%s,%s%d.%02d", info_temp_press, mpu.angle_data_by_kalman[i] < 0 ? "-" : "", abs(int(mpu.angle_data_by_kalman[i])), abs((int)(100 * (mpu.angle_data_by_kalman[i] - int(mpu.angle_data_by_kalman[i])))));
+      }
+      sdm.data_save(info_temp_press);
+      memset(info_temp_press, 0, sizeof(info_temp_press));
+      if(pressure < max_pressure || max_pressure == 0){
+        max_pressure = pressure;
+      } else if(pressure - max_pressure > 7) {
+        ledColor(1,1, 0);  //WHITE
+      }
+      last_time = time;
     }
   }
   sdm.data_save("RECORDING KILLED");
+  Serial.println("HOLA");
   delay(10);
   if (sdm.data_check()) {
     ledColor(0, 1, 1);  //Aguamarina

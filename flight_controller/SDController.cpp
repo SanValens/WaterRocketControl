@@ -45,7 +45,7 @@ void SDController::data_save(char value[60]) {
 
 bool SDController::data_check() {
   dataFile = SD.open(file_name, FILE_WRITE);
-  if(SD.exists(file_name) && dataFile.size() > 0) {
+  if(SD.exists(file_name) && dataFile.size() > 150) {
     dataFile.close();
     return true;
   } else {

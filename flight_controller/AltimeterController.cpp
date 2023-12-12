@@ -74,7 +74,6 @@ float AltimeterController::readTemperature(bool for_pressure) {
     Wire.write(0xFA);
     Wire.endTransmission();
     Wire.requestFrom(_bmp280add, 3);
-    delay(100);
   }
   if(Wire.available() >= 3) {
     /*  

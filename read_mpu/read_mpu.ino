@@ -182,5 +182,5 @@ void loop() {
   Serial.print("\t");
   Serial.print(angle_data_by_gyro[0]);
   Serial.println("\t");
-  delay(50);
+  delay(2000);
 }
